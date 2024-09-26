@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String      @db.VarChar(255)
+  kakaoId    String      @map("kakao_id") @db.VarChar(255)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  deletedAt  DateTime?   @map("deleted_at")
+  savedBooks SavedBook[]
+  notes      Note[]
+
+  @@map("member")
+}
+
+// member가 저장한 book 관계테이블
+model SavedBook {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  // book을 저장한 member id
+  memberId  String    @map("member_id") @db.Uuid
+  // 저장된 book id
+  bookId    String    @map("book_id") @db.Uuid
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  book      Book      @relation(fields: [bookId], references: [id])
+  member    Member    @relation(fields: [memberId], references: [id])
+  notes     Note[]
+
+  @@unique([memberId, bookId])
+  @@map("saved_book")
+}
+
+model Book {
+  // auto generate uuid
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  // 책 제목
+  title       String      @db.VarChar(255)
+  // 네이버 도서 정보 URL
+  link        String      @db.VarChar(2048)
+  // 섬네일 이미지 URL
+  image       String      @db.VarChar(2048)
+  // 저자
+  author      String      @db.VarChar(255)
+  // 판매 가격, 절판일 경우 nul절
+  discount    Int?
+  // 출판사
+  publisher   String      @db.VarChar(255)
+  // ISBN - 13자리, 책이 이미 저장되었는지 확인할 때 사용
+  isbn        String      @unique
+  // 네이버 도서 책 소개
+  description String      @db.Text
+  // 출간일
+  pubdate     DateTime
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
+  savedBooks  SavedBook[]
+
+  @@map("book")
+}
+
+model Note {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content     String    @db.VarChar(1024)
+  savedBookId String    @map("saved_book_id") @db.Uuid
+  memberId    String    @map("member_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  savedBook   SavedBook @relation(fields: [savedBookId], references: [id])
+  member      Member    @relation(fields: [memberId], references: [id])
+
+  @@map("note")
+}
