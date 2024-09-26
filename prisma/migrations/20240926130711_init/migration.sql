@@ -44,7 +44,7 @@ CREATE TABLE "book" (
 CREATE TABLE "note" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "content" VARCHAR(1024) NOT NULL,
-    "book_id" UUID NOT NULL,
+    "saved_book_id" UUID NOT NULL,
     "member_id" UUID NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -66,7 +66,7 @@ ALTER TABLE "saved_book" ADD CONSTRAINT "saved_book_book_id_fkey" FOREIGN KEY ("
 ALTER TABLE "saved_book" ADD CONSTRAINT "saved_book_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "member"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "note" ADD CONSTRAINT "note_book_id_fkey" FOREIGN KEY ("book_id") REFERENCES "book"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "note" ADD CONSTRAINT "note_saved_book_id_fkey" FOREIGN KEY ("saved_book_id") REFERENCES "saved_book"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "note" ADD CONSTRAINT "note_member_id_fkey" FOREIGN KEY ("member_id") REFERENCES "member"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
