@@ -16,27 +16,30 @@ datasource db {
 model Member {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String      @db.VarChar(255)
-  kakaoId   String      @db.VarChar(255)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  deletedAt DateTime?
+  kakaoId   String      @map("kakao_id") @db.VarChar(255)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  deletedAt DateTime?   @map("deleted_at")
   SavedBook SavedBook[]
   Note      Note[]
+
+  @@map("member")
 }
 
 // member가 저장한 book 관계테이블
 model SavedBook {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   // book을 저장한 member id
-  memberId  String
+  memberId  String    @map("member_id") @db.Uuid
   // 저장된 book id
-  bookId    String
+  bookId    String    @map("book_id") @db.Uuid
   createdAt DateTime  @default(now())
   deletedAt DateTime?
   book      Book      @relation(fields: [bookId], references: [id])
   member    Member    @relation(fields: [memberId], references: [id])
 
   @@unique([memberId, bookId])
+  @@map("saved_book")
 }
 
 model Book {
@@ -60,21 +63,25 @@ model Book {
   description String      @db.Text
   // 출간일
   pubdate     DateTime
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  deletedAt   DateTime?   @map("deleted_at")
   notes       Note[]
   savedBook   SavedBook[]
+
+  @@map("book")
 }
 
 model Note {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   content   String    @db.VarChar(1024)
-  bookId    String
-  memberId  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  bookId    String    @map("book_id") @db.Uuid
+  memberId  String    @map("member_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
   book      Book      @relation(fields: [bookId], references: [id])
   member    Member    @relation(fields: [memberId], references: [id])
+
+  @@map("note")
 }
