@@ -14,14 +14,14 @@ datasource db {
 }
 
 model Member {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String      @db.VarChar(255)
-  kakaoId   String      @map("kakao_id") @db.VarChar(255)
-  createdAt DateTime    @default(now()) @map("created_at")
-  updatedAt DateTime    @updatedAt @map("updated_at")
-  deletedAt DateTime?   @map("deleted_at")
-  SavedBook SavedBook[]
-  Note      Note[]
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String      @db.VarChar(255)
+  kakaoId    String      @map("kakao_id") @db.VarChar(255)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  deletedAt  DateTime?   @map("deleted_at")
+  savedBooks SavedBook[]
+  notes      Note[]
 
   @@map("member")
 }
@@ -37,6 +37,7 @@ model SavedBook {
   deletedAt DateTime?
   book      Book      @relation(fields: [bookId], references: [id])
   member    Member    @relation(fields: [memberId], references: [id])
+  notes     Note[]
 
   @@unique([memberId, bookId])
   @@map("saved_book")
@@ -66,22 +67,21 @@ model Book {
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
   deletedAt   DateTime?   @map("deleted_at")
-  notes       Note[]
-  savedBook   SavedBook[]
+  savedBooks  SavedBook[]
 
   @@map("book")
 }
 
 model Note {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  content   String    @db.VarChar(1024)
-  bookId    String    @map("book_id") @db.Uuid
-  memberId  String    @map("member_id") @db.Uuid
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-  book      Book      @relation(fields: [bookId], references: [id])
-  member    Member    @relation(fields: [memberId], references: [id])
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  content     String    @db.VarChar(1024)
+  savedBookId String    @map("saved_book_id") @db.Uuid
+  memberId    String    @map("member_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  savedBook   SavedBook @relation(fields: [savedBookId], references: [id])
+  member      Member    @relation(fields: [memberId], references: [id])
 
   @@map("note")
 }
